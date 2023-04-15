@@ -17,7 +17,7 @@ const Home: NextPage = () => {
         <div className="dark:text-gray-50">Home Page</div>
       </Layout>
       <Layout>
-        <FieldMap />
+        <FieldMap use='create' />
       </Layout>
     </div>
   )

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
+import supabase from '~/lib/supabase';
 import { Map } from 'react-map-gl';
-import type { DrawFeature } from '@mapbox/mapbox-gl-draw';
 
 import MapDrawControl from './MapDrawControl';
 
@@ -8,12 +8,32 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 
 const MAPBOX_TOKEN = 'pk.eyJ1IjoiY2pzdHVja3kiLCJhIjoiY2xhMzlvcnhlMG94czNwbWhzN3Z3Z3V6cCJ9.FYRlIp7y4CKe7qhm66VsTQ';
 
+interface Feature {
+  id: string;
+  type: string;
+  properties: Record<string, unknown>;
+  geometry: Geometry;
+}
+
+interface Geometry {
+  type: string;
+  coordinates: number[][][];
+}
+
+interface Field {
+  id: number,
+  name: string,
+  created_at: Date,
+}
+
+
 interface FieldMapProps {
   use?: 'display' | 'create' | 'update'
 }
 
 export default function FieldMap({use = 'display'}: FieldMapProps) {
-  const [features, setFeatures] = useState<DrawFeature[]>([]);
+  const [features, setFeatures] = useState<Feature[]>([]);
+  const [fieldName, setFieldName] = useState('');
 
   useEffect(() => {
     if (use !== 'create') {
@@ -47,6 +67,44 @@ export default function FieldMap({use = 'display'}: FieldMapProps) {
     });
   }, []);
 
+  const onSave = async () => {
+    const { data: fieldData, error: fieldError } =  await supabase
+      .from<Field>('fields')
+      .insert({
+        name: fieldName
+      });
+
+    const fieldID = fieldData?.[0]?.id;
+
+    if (!fieldID) {
+      // TODO: error handling.
+      return;
+    }
+
+    for (const coordinate in features[0].geometry.coordinates[0]) {
+      const { data, error: coordinateError } = await supabase
+        .from('coordinates')
+        .insert({
+          latitude: features[0].geometry.coordinates[0][coordinate][0],
+          longitude: features[0].geometry.coordinates[0][coordinate][1],
+        })
+
+      const coordinateID = data?.[0]?.id;
+
+      if (!coordinateID) {
+        // TODO: error handling.
+        return;
+      }
+
+      const { error } = await supabase
+        .from('fields_x_coordinates')
+        .insert({
+          field_id: fieldID,
+          coordinate_id: coordinateID,
+        })
+    }
+  }
+
   return (
     <div>
       <Map
@@ -72,7 +130,8 @@ export default function FieldMap({use = 'display'}: FieldMapProps) {
           onDelete={onDelete}
         />
       </Map>
-      <button onClick={() => console.log(features)}>See features</button>
+      <input value={fieldName} onChange={(e) => setFieldName(e.target.value)} type='text' />
+      <button onClick={onSave}>Save</button>
     </div>
   )
 }

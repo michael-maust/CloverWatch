@@ -1,10 +1,9 @@
 import { Auth } from '@supabase/auth-ui-react'
 import { ThemeSupa } from '@supabase/auth-ui-shared'
 import { useSession, useSupabaseClient } from '@supabase/auth-helpers-react'
-import Account from '../components/Account'
+import Onboarding from '../components/Onboarding'
 import Image from 'next/image'
 import logo from 'public/logo.svg'
-import headerImage from 'public/coverImage.jpg'
 
 const FEATURES = ['Crop Rotation Scheduling', 'Soil Analysis', 'Field Mapping', 'Weather Forecasting', 'Farm Management', 'Treatment Scheduling']
 
@@ -12,6 +11,8 @@ const FEATURES = ['Crop Rotation Scheduling', 'Soil Analysis', 'Field Mapping', 
 const Home = () => {
   const session = useSession()
   const supabase = useSupabaseClient()
+
+  console.log(session)
 
   return (
     <div className="h-screen w-screen flex justify-center items-center">
@@ -39,7 +40,7 @@ const Home = () => {
           </div>
         </div>
       ) : (
-        <Account session={session} />
+        <Onboarding session={session} />
       )}
     </div>
   )

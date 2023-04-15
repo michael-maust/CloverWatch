@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import supabase from '~/lib/supabase';
-import GeoJSONLayer, { Map } from 'react-map-gl';
+import { Layer, Map, MapRef, Source } from 'react-map-gl';
 
 import MapDrawControl from './MapDrawControl';
 
@@ -9,16 +9,20 @@ import MapboxDraw from '@mapbox/mapbox-gl-draw';
 
 const MAPBOX_TOKEN = 'pk.eyJ1IjoiY2pzdHVja3kiLCJhIjoiY2xhMzlvcnhlMG94czNwbWhzN3Z3Z3V6cCJ9.FYRlIp7y4CKe7qhm66VsTQ';
 
-interface Feature {
-  id: string;
-  type: string;
-  properties: Record<string, unknown>;
+interface Feature<Geometry, Properties> {
+  id?: string | number;
+  type: 'Feature';
   geometry: Geometry;
+  properties: Properties;
 }
 
 interface Geometry {
-  type: string;
+  type: 'Polygon';
   coordinates: number[][][];
+}
+
+interface Properties {
+  name?: string;
 }
 
 interface Field {
@@ -28,13 +32,15 @@ interface Field {
 }
 
 
-interface FieldMapProps {
+interface FieldMapUpdateProps {
   use?: 'display' | 'create' | 'update',
   fieldID?: number
 }
 
-export default function FieldMap({use = 'display', fieldID}: FieldMapProps) {
-  const [features, setFeatures] = useState<Feature[]>([]);
+export default function FieldMapUpdate({use = 'display', fieldID}: FieldMapUpdateProps) {
+  const mapRef = useRef<MapRef>(null);
+  const [features, setFeatures] = useState<Feature<Geometry, Properties>[]>([]);
+  const [currentFeatures, setCurrentFeatures] = useState<Feature<Geometry, Properties>[]>([]);
   const [fieldName, setFieldName] = useState('');
 
   useEffect(() => {
@@ -49,18 +55,6 @@ export default function FieldMap({use = 'display', fieldID}: FieldMapProps) {
 
     populateFieldToUpdate();
   }, [])
-
-  useEffect(() => {
-    if (use !== 'create') {
-      return;
-    }
-
-    if (features.length > 0) {
-      document.getElementsByClassName('mapbox-gl-draw_polygon')[0]?.setAttribute('disabled', 'true');
-    } else {
-      document.getElementsByClassName('mapbox-gl-draw_polygon')[0]?.removeAttribute('disabled');
-    }
-  }, [use, features])
 
   const populateFieldToUpdate = async () => {
     const { data: coordinateIDsFromDB } = await supabase.from('fields_x_coordinates').select('*').eq('field_id', fieldID);
@@ -77,8 +71,8 @@ export default function FieldMap({use = 'display', fieldID}: FieldMapProps) {
       return;
     }
 
-    const fieldFeature: Feature = {
-      id: '',
+    const fieldFeature: Feature<Geometry, Properties> = {
+      id: 'first-feature',
       type: 'Feature',
       properties: {},
       geometry: {
@@ -87,7 +81,7 @@ export default function FieldMap({use = 'display', fieldID}: FieldMapProps) {
       }
     }
 
-    setFeatures([fieldFeature]);
+    setCurrentFeatures([fieldFeature]);
   }
 
   const onUpdate = useCallback(e => {
@@ -151,6 +145,7 @@ export default function FieldMap({use = 'display', fieldID}: FieldMapProps) {
   return (
     <div>
       <Map
+        ref={mapRef}
         initialViewState={{
           latitude: 37.8,
           longitude: -122.4,
@@ -172,9 +167,19 @@ export default function FieldMap({use = 'display', fieldID}: FieldMapProps) {
           onUpdate={onUpdate}
           onDelete={onDelete}
         />
+        <Source id='current-field' type='geojson' data={{type: 'FeatureCollection', features: currentFeatures}}>
+          <Layer
+            id='current-field-layer'
+            type='fill'
+            paint={{
+              'fill-color': '#FF0000',
+              'fill-opacity': 0.3,
+            }}
+          />
+        </Source>
       </Map>
       <input value={fieldName} onChange={(e) => setFieldName(e.target.value)} type='text' />
-      <button onClick={onSave}>Save</button>
+      <button onClick={() => console.log(features)}>Save</button>
     </div>
   )
 }

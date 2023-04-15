@@ -4,19 +4,19 @@ module.exports = {
   images: {
     domains: [process.env.SUPABASE_HOSTNAME],
   },
-  async redirects() {
-    return [
-      {
-        permanent: false,
-        source: '/',
-        destination: '/partners/integrations',
-      },
-      // Have integrations as the default partners page
-      {
-        permanent: false,
-        source: '/partners',
-        destination: '/partners/integrations',
-      },
-    ]
-  },
+  // async redirects() {
+  //   return [
+  //     {
+  //       permanent: false,
+  //       source: '/',
+  //       destination: '/',
+  //     },
+  //     // Have integrations as the default partners page
+  //     {
+  //       permanent: false,
+  //       source: '/partners',
+  //       destination: '/',
+  //     },
+  //   ]
+  // },
 }

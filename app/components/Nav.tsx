@@ -6,8 +6,8 @@ const Nav = () => {
   const { isDarkMode } = useTheme()
 
   return (
-    <nav className="w-full border-b bg-scale-300 p-4">
-      <Link href="https://supabase.com/">
+    <nav className="w-full h-24 bg-slate-800 border-b p-4">
+      <Link href="/">
         <a className="flex">
           <Image
             src={

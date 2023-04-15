@@ -177,7 +177,7 @@ export default function BecomeAPartner({ supabase }: { supabase: SupabaseClient 
                   id="details"
                   name="details"
                   label="Additional Details"
-                  placeholder="Tell us about your projects, clients, and technology..."
+                  placeholder="Tell us about your projects, clients, and technology... CHANGE"
                   rows={10}
                 />
               </div>

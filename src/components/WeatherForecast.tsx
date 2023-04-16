@@ -75,12 +75,12 @@ const WeatherForecast: React.FC<WeatherForecastProps> = ({ lat, long }) => {
 		<div className="flex gap-4 overflow-x-auto rounded p-2 shadow-md">
 			{forecastData.map((data, index) => (
 				<div key={data.date} className="flex-shrink-0 w-64 rounded-2xl p-4 m-2 bg-charcoal h-fit">
-					<h3 className="mb-4 text-sm font-bold text-center text-white bg-blue-900 py-2">{data.date}</h3>
-					<p className="text-gray-800 py-1 px-2 ml-2">{data.description}</p>
-					<p className="text-gray-800 py-1 px-2 ml-2">{data.high}/{data.low}°F</p>
-					<p className="text-gray-800 py-1 px-2 ml-2">{data.windspeed} mph</p>
-					<p className="text-gray-800 py-1 px-2 ml-2">{data.chanceOfRain}% {data.rainAmount} in</p>
-					<p className="text-gray-800 py-1 px-2 ml-2">{data.humidity}%</p>
+					<h3 className="text-lg font-bold text-center text-tan bg-blue-900 pt-2">{data.date}</h3>
+					<p className="text-tan pb-1 px-2 ml-2 capitalize text-center">{data.description}</p>
+					<p className="text-tan py-1 px-2 ml-2">Temp: {data.high}/{data.low}°F</p>
+					<p className="text-tan py-1 px-2 ml-2">Wind: {data.windspeed} mph</p>
+					<p className="text-tan py-1 px-2 ml-2">Rain: {data.chanceOfRain}% / {data.rainAmount} in</p>
+					<p className="text-tan py-1 px-2 ml-2">Humidity: {data.humidity}%</p>
 				</div>
 			))}
 		</div>

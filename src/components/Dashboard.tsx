@@ -19,9 +19,9 @@ function Dashboard({ setIsUpdating }: Dashboard) {
 
 
   return (
-    <Layout className='flex-col gap-3 flex-1 grid grid-rows-[100px,auto] relative'>
+    <Layout className='flex-col flex-1 grid grid-rows-[100px,auto] relative'>
 
-      <header className="bg-lightGreen w-full flex-1 sticky top-0 p-6 items-center flex">
+      <header className="bg-lightGreen w-full flex-1 sticky top-0 p-6 items-center flex mb-3">
         <div className="flex gap-3 justify-between w-full">
           <h2 className="text-3xl font-bold text-charcoal">Farm Overview
             <span className='text-orange mx-3'>{`//`}</span>
@@ -37,14 +37,18 @@ function Dashboard({ setIsUpdating }: Dashboard) {
 
 
       </header>
+
+      <h3 className="text-2xl pl-3 font-bold text-charcoal">Weather Forecast</h3>
       <WeatherForecast lat={40.7128} long={-74.006} />
 
-      <div className="px-3 w-fit mx-auto  relative rounded-xl ">
+
+      <div className="px-3 w-fit mx-auto  relative rounded-xl mb-[100px] mt-[25px]">
+        <h3 className="text-2xl font-bold text-charcoal mb-3">Fields</h3>
         <FieldMap use='create' />
       </div>
 
 
-      <Tasks />
+      {/* <Tasks /> */}
 
     </Layout>
   )

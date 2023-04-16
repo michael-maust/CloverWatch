@@ -42,19 +42,21 @@ export default function FieldMap({use = 'display', fieldID}: FieldMapProps) {
   const [fieldName, setFieldName] = useState('');
 
   useEffect(() => {
-    if (use != 'update') {
+    if (use === 'create') {
       return;
     }
 
-    if (!fieldID) {
-      //Todo error handling.
-      return;
+    if (fieldID && use === 'update') {
+      populateFieldToUpdate();
     }
 
-    populateFieldToUpdate();
+    if (use === 'display') {
+      populateFieldDisplay();
+    }
   }, [])
 
   useEffect(() => {
+    console.log(features)
     if (use === 'display') {
       return;
     }
@@ -65,6 +67,40 @@ export default function FieldMap({use = 'display', fieldID}: FieldMapProps) {
       document.getElementsByClassName('mapbox-gl-draw_polygon')[0]?.removeAttribute('disabled');
     }
   }, [use, features])
+
+  const populateFieldDisplay = async () => {
+    const { data: fields, error } = await supabase
+      .from('fields_x_coordinates')
+      .select(`
+        field:field_id ( id, name ),
+        coordinate:coordinate_id ( latitude, longitude )
+      `);
+
+    const groupedFields = fields?.reduce((acc, field) => {
+      const { id } = field.field;
+      if (!acc[id]) {
+        acc[id] = [];
+      }
+      acc[id].push(field);
+      return acc;
+    }, {});
+
+    const display = Object.keys(groupedFields).map((key): Feature<Geometry, Properties> => {
+      const field = groupedFields[key];
+
+      return {
+        id: field[0].field.id,
+        type: 'Feature',
+        properties: {},
+        geometry: {
+          type: 'Polygon',
+          coordinates: field.map((f: any) => [f.coordinate.latitude, f.coordinate.longitude])
+        }
+      }
+    })
+
+    setFeatures(display);
+  }
 
   const populateFieldToUpdate = async () => {
     const { data: fieldDataFromDB } = await supabase.from('fields').select('*').eq('id', fieldID);
@@ -143,7 +179,7 @@ export default function FieldMap({use = 'display', fieldID}: FieldMapProps) {
         .eq('id', fieldID)
     }
     
-    newFieldID = newFieldID ?? fieldID;
+    newFieldID = newFieldID ? newFieldID : fieldID;
 
 
     if (!newFieldID && !fieldID) {
@@ -218,28 +254,44 @@ export default function FieldMap({use = 'display', fieldID}: FieldMapProps) {
         mapStyle="mapbox://styles/mapbox/satellite-v9"
         mapboxAccessToken={MAPBOX_TOKEN}
       >
-        <MapDrawControl
-          position='top-left'
-          displayControlsDefault={false}
-          controls={{
-            polygon: use !== 'display',
-            trash: use !== 'display',
-          }}
-          defaultMode="draw_polygon"
-          onCreate={onUpdate}
-          onUpdate={onUpdate}
-          onDelete={onDelete}
-        />
-        <Source id='current-field' type='geojson' data={{type: 'FeatureCollection', features: currentFeatures}}>
-          <Layer
-            id='current-field-layer'
-            type='fill'
-            paint={{
-              'fill-color': '#FF0000',
-              'fill-opacity': 0.3,
-            }}
-          />
-        </Source>
+        {use !== 'display' &&
+          <div>
+            <MapDrawControl
+              position='top-left'
+              displayControlsDefault={false}
+              controls={{
+                polygon: true,
+                trash: true,
+              }}
+              defaultMode="draw_polygon"
+              onCreate={onUpdate}
+              onUpdate={onUpdate}
+              onDelete={onDelete}
+            />
+            <Source id='current-field' type='geojson' data={{type: 'FeatureCollection', features: currentFeatures}}>
+              <Layer
+                id='current-field-layer'
+                type='fill'
+                paint={{
+                  'fill-color': '#FF0000',
+                  'fill-opacity': 0.3,
+                }}
+              />
+            </Source>
+          </div>
+        }
+        {use === 'display' &&
+          <Source id='fields' type='geojson' data={{type: 'FeatureCollection', features}}>
+            <Layer
+              id='fields'
+              type='fill'
+              paint={{
+                'fill-color': '#FF0000',
+                'fill-opacity': 0.3,
+              }}
+            />
+          </Source>
+        }
       </Map>
       <input value={fieldName} onChange={(e) => setFieldName(e.target.value)} type='text' />
       <button onClick={onSave}>Save</button>

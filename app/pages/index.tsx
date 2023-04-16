@@ -1,7 +1,7 @@
 import type { NextPage } from 'next'
 import Head from 'next/head'
 import Layout from '~/components/Layout'
-import FieldMapUpdate from '~/components/map/FieldMapUpdate'
+import FieldMapUpdate from '~/components/map/FieldMap'
 
 import "mapbox-gl/dist/mapbox-gl.css";
 import FieldMap from '~/components/map/FieldMap';
@@ -18,7 +18,7 @@ const Home: NextPage = () => {
         <div className="dark:text-gray-50">Home Page</div>
       </Layout>
       <Layout>
-        <FieldMapUpdate use='update' fieldID={15} />
+        <FieldMap use='update' fieldID={18} />
         {/* <FieldMap use='create' /> */}
       </Layout>
     </div>

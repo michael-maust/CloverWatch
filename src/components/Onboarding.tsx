@@ -1,10 +1,11 @@
-import { useState, useEffect, useCallback } from 'react'
-import { useUser, useSupabaseClient, Session } from '@supabase/auth-helpers-react'
+import { useCallback } from 'react'
 import { useProfile } from '@/hooks/useProfile'
 import { FormProvider, useForm } from 'react-hook-form'
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import TextField from './TextField';
+import { redirect } from 'next/navigation';
+import Dashboard from './Dashboard';
 
 const schema = z.object({
 	fullName: z.string().min(1, "Your name is required"),
@@ -13,9 +14,8 @@ const schema = z.object({
 });
 
 
-export default function Onboarding({ session }: { session: Session }) {
-	const { loading, fullName, zipcode, farmName, updateProfile } = useProfile(session)
-
+export default function Onboarding() {
+	const { loading, fullName, zipcode, farmName, profileId, updateProfile } = useProfile()
 
 	const methods = useForm({
 		defaultValues: {
@@ -32,9 +32,12 @@ export default function Onboarding({ session }: { session: Session }) {
 		(data: any) => {
 			if (loading) return;
 			updateProfile(data);
+			redirect('/dashboard')
 		},
 		[loading, updateProfile]
 	);
+
+	if (loading) return <div>Loading...</div>
 
 	if (!zipcode || !farmName) return (
 		<FormProvider {...methods}>
@@ -69,14 +72,10 @@ export default function Onboarding({ session }: { session: Session }) {
 				>
 					Submit
 				</button>
-
-
-
 			</form>
 		</FormProvider>
 	)
 
-	return (
-		<div className="">Onboarding {fullName} - {zipcode} - {farmName} </div>
-	)
+	return (<Dashboard />)
+
 }

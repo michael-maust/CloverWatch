@@ -1,13 +1,15 @@
 import {useQuery} from "@tanstack/react-query";
 import {
   Session,
+  useSession,
   useSupabaseClient,
   useUser,
 } from "@supabase/auth-helpers-react";
 import {useCallback, useEffect, useState} from "react";
 
-export const useProfile = (session: Session) => {
+export const useProfile = () => {
   const supabase = useSupabaseClient();
+  const session = useSession();
   const user = useUser();
 
   const [loading, setLoading] = useState(true);
@@ -78,5 +80,12 @@ export const useProfile = (session: Session) => {
     [user?.id]
   );
 
-  return {loading, fullName, zipcode, farmName, updateProfile};
+  return {
+    loading,
+    fullName,
+    zipcode,
+    farmName,
+    profileId: user?.id,
+    updateProfile,
+  };
 };

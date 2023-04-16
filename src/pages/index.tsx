@@ -15,9 +15,9 @@ const Home = () => {
   console.log(session)
 
   return (
-    <div className="h-screen w-screen flex justify-center items-center">
+    <>
       {!session ? (
-        <div className="grid grid-cols-2  w-screen h-screen p-6 justify-center items-center">
+        <div className="grid grid-cols-2 w-screen h-screen p-6 justify-center items-center overflow-y-auto">
 
           <div className="px-12 rounded-2xl shadow-sm bg-tan flex flex-col h-fit py-16 justify-center gap-6 border-2 border-gray">
             <Image src={logo} alt='header image' width={300} height={300} />
@@ -40,9 +40,9 @@ const Home = () => {
           </div>
         </div>
       ) : (
-        <Onboarding session={session} />
+        <Onboarding />
       )}
-    </div>
+    </>
   )
 }
 

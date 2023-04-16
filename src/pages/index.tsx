@@ -12,8 +12,6 @@ const Home = () => {
   const session = useSession()
   const supabase = useSupabaseClient()
 
-  console.log(session)
-
   return (
     <>
       {!session ? (

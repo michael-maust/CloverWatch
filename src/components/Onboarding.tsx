@@ -9,6 +9,7 @@ import Image from 'next/image'
 import logo from 'public/logo.svg'
 import Router, { useRouter } from "next/router";
 import cx from 'clsx'
+import Layout from './Layout';
 
 const schema = z.object({
 	fullName: z.string().min(1, "Your name is required"),
@@ -54,7 +55,7 @@ export default function Onboarding() {
 		[loading, router, updateProfile]
 	);
 
-	if (loading) return <div>Loading...</div>
+	if (loading) return <Layout>Loading...</Layout>
 
 	if (!zipcode || !farmName || isUpdating) return (
 		<div className="w-screen h-screen flex justify-center items-center">

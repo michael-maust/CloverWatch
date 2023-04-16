@@ -35,12 +35,7 @@ function NavLinks() {
 	return (
 		<nav className='flex flex-col gap-6 pb-48 w-full'>
 			<NavButton href='/' isActive={currentRoute === '/'} label='Overview' icon={faHome} />
-
 			<NavButton href='/fields' isActive={currentRoute === '/fields'} label='Fields' icon={faMapLocation} />
-			<NavButton href='/fields' isActive={currentRoute === '/fields'} label='Fields' icon={faMapLocation} />
-
-
-
 		</nav>
 	)
 }

@@ -3,6 +3,7 @@ import Layout from './Layout'
 import { Dispatch, SetStateAction } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPencil } from '@fortawesome/free-solid-svg-icons'
+import Tasks from './Tasks'
 
 type Dashboard = {
   setIsUpdating: Dispatch<SetStateAction<boolean>>
@@ -35,7 +36,8 @@ function Dashboard({ setIsUpdating }: Dashboard) {
       </div>
 
       <div className="h-[3000px] overflow-y-auto p-3">body</div>
-      test
+
+      <Tasks />
 
     </Layout>
   )

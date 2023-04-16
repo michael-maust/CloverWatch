@@ -41,7 +41,7 @@ export const useProfile = () => {
         setFarmName(data.farm_name);
       }
     } catch (error) {
-      alert("Error loading user data!");
+      console.error("Error loading user data!");
       console.log(error);
     } finally {
       setLoading(false);
@@ -69,9 +69,9 @@ export const useProfile = () => {
 
         let {error} = await supabase.from("profiles").upsert(updates);
         if (error) throw error;
-        alert("Profile updated!");
+        console.log("Profile updated!");
       } catch (error) {
-        alert("Error updating the data!");
+        console.error("Error updating the data!");
         console.log(error);
       } finally {
         setLoading(false);

@@ -1,12 +1,14 @@
 import React, { InputHTMLAttributes } from "react";
 import { useFormContext, useController } from "react-hook-form";
+import cx from 'clsx'
 
 type TextFieldProps = InputHTMLAttributes<HTMLInputElement> & {
 	fieldName: string;
 	label: string;
+	className?: string
 };
 
-function TextField({ fieldName, label, ...props }: TextFieldProps) {
+function TextField({ fieldName, label, className, ...props }: TextFieldProps) {
 	const { register, control } = useFormContext();
 
 	const {
@@ -21,7 +23,7 @@ function TextField({ fieldName, label, ...props }: TextFieldProps) {
 		<div className="flex flex-col">
 			<label className="text-charcoal pb-.5">{label}</label>
 			<input
-				className="py-1 px-2 truncate bg-gray-200 focus:outline-none focus:ring-orange focus:ring-2 rounded-lg w-full"
+				className={cx("py-1 px-2 truncate bg-gray-200 focus:outline-none focus:ring-orange focus:ring-2 rounded-lg w-full", className)}
 				{...register(fieldName, {
 					required: true,
 				})}

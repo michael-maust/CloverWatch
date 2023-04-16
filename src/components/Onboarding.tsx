@@ -1,11 +1,14 @@
-import { useCallback } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useProfile } from '@/hooks/useProfile'
 import { FormProvider, useForm } from 'react-hook-form'
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import TextField from './TextField';
-import { redirect } from 'next/navigation';
 import Dashboard from './Dashboard';
+import Image from 'next/image'
+import logo from 'public/logo.svg'
+import Router, { useRouter } from "next/router";
+import cx from 'clsx'
 
 const schema = z.object({
 	fullName: z.string().min(1, "Your name is required"),
@@ -15,7 +18,12 @@ const schema = z.object({
 
 
 export default function Onboarding() {
+	const [isUpdating, setIsUpdating] = useState(false)
 	const { loading, fullName, zipcode, farmName, profileId, updateProfile } = useProfile()
+
+	const router = useRouter()
+
+
 
 	const methods = useForm({
 		defaultValues: {
@@ -28,54 +36,84 @@ export default function Onboarding() {
 
 	const { handleSubmit, reset, control, watch } = methods;
 
+	useEffect(() => {
+		reset({
+			fullName: fullName ?? '',
+			farmName: farmName ?? '',
+			zipcode: zipcode ?? '',
+		})
+	}, [farmName, fullName, reset, zipcode])
+
 	const onSubmit = useCallback(
-		(data: any) => {
+		async (data: any) => {
 			if (loading) return;
-			updateProfile(data);
-			redirect('/dashboard')
+			await updateProfile(data);
+			setIsUpdating(false)
+			router.reload()
 		},
-		[loading, updateProfile]
+		[loading, router, updateProfile]
 	);
 
 	if (loading) return <div>Loading...</div>
 
-	if (!zipcode || !farmName) return (
-		<FormProvider {...methods}>
-			<form
-				onSubmit={handleSubmit(onSubmit)}
-				className="flex flex-col gap-3 overflow-y-auto p-1 pr-5"
-			>
+	if (!zipcode || !farmName || isUpdating) return (
+		<div className="w-screen h-screen flex justify-center items-center">
 
-				<TextField
-					label="Your Name"
-					fieldName="fullName"
-					placeholder="Enter your full name"
-				/>
 
-				<TextField
-					label="Farm Name"
-					fieldName="farmName"
-					placeholder="Enter the farm name"
-				/>
-
-				<TextField
-					label="Zipcode"
-					fieldName="zipcode"
-					placeholder="Enter the zipcode"
-				/>
-
-				{/* Hidden submit used as a quick way to enable submit onEnter */}
-				<input type="submit" className="hidden" />
-				<button
-					onClick={handleSubmit(onSubmit)}
-					className="py-1 px-2 bg-green text-white rounded-lg"
+			<FormProvider {...methods}>
+				<form
+					onSubmit={handleSubmit(onSubmit)}
+					className="flex flex-col gap-3 overflow-y-auto p-1 w-1/2 h-3/4 bg-tan border-2 shadow-lg border-charcoal rounded-2xl items-center justify-center"
 				>
-					Submit
-				</button>
-			</form>
-		</FormProvider>
+
+					<Image src={logo} alt='header image' width={300} height={300} className='mb-6' />
+					<div className="flex flex-col items-center">
+						<h2 className="text-2xl font-bold text-charcoal mb-0 pb-0">Farm Details</h2>
+						<p className="mb-6 text-charcoal font-normal">Provide some details about your farm</p>
+					</div>
+
+					<TextField
+						label="Your Name"
+						fieldName="fullName"
+						placeholder="Enter your full name"
+						className='min-w-[300px]'
+					/>
+
+					<TextField
+						label="Farm Name"
+						fieldName="farmName"
+						placeholder="Enter the farm name"
+						className='min-w-[300px]'
+					/>
+
+					<TextField
+						label="Zipcode"
+						fieldName="zipcode"
+						placeholder="Enter the zipcode"
+						className='min-w-[300px]'
+					/>
+
+					{/* Hidden submit used as a quick way to enable submit onEnter */}
+					<input type="submit" className="hidden" />
+					<div className={cx("flex justify-between gap-3  ", isUpdating && 'grid grid-cols-2 max-w-[300px] w-full')}>
+						<button
+							onClick={handleSubmit(onSubmit)}
+							className="py-1 px-2 bg-green text-white rounded-lg min-w-[150px]  mt-3 hover:opacity-70"
+						>
+							Submit
+						</button>
+						{isUpdating && <button
+							onClick={() => setIsUpdating(false)}
+							className="py-1 px-2 bg-charcoal text-white rounded-lg  mt-3 hover:opacity-70"
+						>
+							Cancel
+						</button>}
+					</div>
+				</form>
+			</FormProvider>
+		</div>
 	)
 
-	return (<Dashboard />)
+	return (<Dashboard setIsUpdating={setIsUpdating} />)
 
 }

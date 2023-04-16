@@ -22,7 +22,7 @@ function Layout({ children, className }: LayoutProps) {
 
 
   return (
-    <div className='w-screen h-screen bg-tan flex overflow-y-auto'>
+    <div className='w-screen bg-tan flex overflow-y-auto'>
       <div className="bg-charcoal max-w-[250px] w-[90vw] p-3 pt-6 flex flex-col items-center justify-between">
         <Image src={whiteLogo} alt='header image' />
 

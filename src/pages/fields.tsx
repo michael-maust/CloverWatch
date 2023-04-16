@@ -39,8 +39,6 @@ function Fields({ setIsUpdating }: FieldProps) {
 
 
 			</div>
-
-			<div className="h-[3000px] overflow-y-auto p-3">body</div>
 			test
 
 		</Layout>

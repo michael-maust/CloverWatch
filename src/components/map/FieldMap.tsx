@@ -294,8 +294,8 @@ export default function FieldMap({ use = 'display', fieldID }: FieldMapProps) {
           </Source>
         }
       </Map>
-      <input value={fieldName} onChange={(e) => setFieldName(e.target.value)} type='text' />
-      <button onClick={onSave}>Save</button>
+      <input className='bg-gray-200' value={fieldName} onChange={(e) => setFieldName(e.target.value)} type='text' />
+      <button className='bg-gray-200' onClick={onSave}>Save</button>
     </div>
   )
 }

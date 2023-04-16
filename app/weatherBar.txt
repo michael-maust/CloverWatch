@@ -1,0 +1,46 @@
+.weather-bar-container {
+  overflow-x: auto;
+  position: relative;
+}
+
+.weather-bar {
+  display: flex;
+}
+
+.weather-card {
+  background-color: #f3f3f3;
+  border-radius: 20px;
+  margin-right: 16px;
+  padding: 16px;
+  transition: all 0.2s ease-in-out;
+}
+
+.weather-card:hover {
+  transform: scale(1.05);
+}
+
+.weather-card::after {
+  content: "";
+  display: block;
+  width: 20px;
+  height: 20px;
+  position: absolute;
+  top: calc(50% - 10px);
+  background: linear-gradient(to right, transparent, #f3f3f3);
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.2s ease-in-out;
+}
+
+.weather-card:hover::after {
+  opacity: 1;
+  right: -12px;
+}
+
+.weather-card:first-of-type {
+  margin-left: 0;
+}
+
+.weather-card:last-of-type {
+  margin-right: 0;
+}

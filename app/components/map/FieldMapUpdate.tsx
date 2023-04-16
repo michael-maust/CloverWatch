@@ -5,7 +5,6 @@ import { Layer, Map, MapRef, Source } from 'react-map-gl';
 import MapDrawControl from './MapDrawControl';
 
 import 'mapbox-gl/dist/mapbox-gl.css';
-import MapboxDraw from '@mapbox/mapbox-gl-draw';
 
 const MAPBOX_TOKEN = 'pk.eyJ1IjoiY2pzdHVja3kiLCJhIjoiY2xhMzlvcnhlMG94czNwbWhzN3Z3Z3V6cCJ9.FYRlIp7y4CKe7qhm66VsTQ';
 
@@ -38,7 +37,6 @@ interface FieldMapUpdateProps {
 }
 
 export default function FieldMapUpdate({use = 'display', fieldID}: FieldMapUpdateProps) {
-  const mapRef = useRef<MapRef>(null);
   const [features, setFeatures] = useState<Feature<Geometry, Properties>[]>([]);
   const [currentFeatures, setCurrentFeatures] = useState<Feature<Geometry, Properties>[]>([]);
   const [fieldName, setFieldName] = useState('');
@@ -56,7 +54,20 @@ export default function FieldMapUpdate({use = 'display', fieldID}: FieldMapUpdat
     populateFieldToUpdate();
   }, [])
 
+  useEffect(() => {
+    if (use === 'display') {
+      return;
+    }
+
+    if (features.length > 0) {
+      document.getElementsByClassName('mapbox-gl-draw_polygon')[0]?.setAttribute('disabled', 'true');
+    } else {
+      document.getElementsByClassName('mapbox-gl-draw_polygon')[0]?.removeAttribute('disabled');
+    }
+  }, [use, features])
+
   const populateFieldToUpdate = async () => {
+    const { data: fieldDataFromDB } = await supabase.from('fields').select('*').eq('id', fieldID);
     const { data: coordinateIDsFromDB } = await supabase.from('fields_x_coordinates').select('*').eq('field_id', fieldID);
     const processedCoordinateIDs = coordinateIDsFromDB?.map(c => c.coordinate_id);
     if (!processedCoordinateIDs) {
@@ -81,6 +92,7 @@ export default function FieldMapUpdate({use = 'display', fieldID}: FieldMapUpdat
       }
     }
 
+    setFieldName(fieldDataFromDB?.[0].name || '');
     setCurrentFeatures([fieldFeature]);
   }
 
@@ -105,47 +117,113 @@ export default function FieldMapUpdate({use = 'display', fieldID}: FieldMapUpdat
   }, []);
 
   const onSave = async () => {
-    const { data: fieldData, error: fieldError } =  await supabase
-      .from<Field>('fields')
-      .insert({
-        name: fieldName
-      });
+    let newFieldID;
 
-    const fieldID = fieldData?.[0]?.id;
+    if (use === 'create') {
+      const { data: fieldData, error: fieldError } =  await supabase
+        .from<Field>('fields')
+        .insert({
+          name: fieldName
+        })
 
-    if (!fieldID) {
+      newFieldID = fieldData?.[0]?.id;
+    }
+
+    if (use === 'update') {
+      if (!fieldID) {
+        // TODO: handle error.
+        return;
+      }
+
+      const { data: fieldData, error: fieldError } =  await supabase
+        .from<Field>('fields')
+        .update({
+          name: fieldName
+        })
+        .eq('id', fieldID)
+
+    newFieldID = fieldData?.[0]?.id;
+    }
+    
+    newFieldID = newFieldID ?? fieldID;
+
+
+    if (!newFieldID && !fieldID) {
       // TODO: error handling.
       return;
     }
 
-    for (const coordinate in features[0].geometry.coordinates[0]) {
-      const { data, error: coordinateError } = await supabase
-        .from('coordinates')
-        .insert({
-          latitude: features[0].geometry.coordinates[0][coordinate][0],
-          longitude: features[0].geometry.coordinates[0][coordinate][1],
-        })
-
-      const coordinateID = data?.[0]?.id;
-
-      if (!coordinateID) {
-        // TODO: error handling.
-        return;
+    if (features.length > 0) {
+      for (const coordinate in features[0].geometry.coordinates[0]) {
+        let coordinateID;
+  
+        if (use === 'create') {
+          const { data, error: coordinateError } = await supabase
+            .from('coordinates')
+            .insert({
+              latitude: features[0].geometry.coordinates[0][coordinate][0],
+              longitude: features[0].geometry.coordinates[0][coordinate][1],
+            })
+  
+          coordinateID = data?.[0]?.id;
+        }
+  
+        if (use === 'update') {
+          if (!newFieldID) {
+            // TODO error checking.
+            return;
+          }
+          
+          const { data } = await supabase
+            .from("fields_x_coordinates")
+            .select("coordinate_id")
+            .eq("field_id", newFieldID);
+  
+          const coordinatesIdsToDelete = data?.map((row) => row.coordinate_id);
+  
+          if (!coordinatesIdsToDelete) {
+            //TODO error catching.
+            return;
+          }
+  
+          const { data: deleteDataCoordinatesxFields, error: deleteErrorCoordinatesxFields  } = await supabase
+            .from("fields_x_coordinates")
+            .delete()
+            .in("coordinate_id", coordinatesIdsToDelete);
+  
+          const { data: deleteData, error } = await supabase
+            .from("coordinates")
+            .delete()
+            .in("id", coordinatesIdsToDelete);
+  
+          const { data: newCoordsData, error: coordinateError } = await supabase
+            .from('coordinates')
+            .insert({
+              latitude: features[0].geometry.coordinates[0][coordinate][0],
+              longitude: features[0].geometry.coordinates[0][coordinate][1],
+            })
+  
+          coordinateID = newCoordsData?.[0]?.id;
+        }
+  
+        if (!coordinateID) {
+          // TODO: error handling.
+          return;
+        }
+  
+        const { error } = await supabase
+          .from('fields_x_coordinates')
+          .insert({
+            field_id: newFieldID,
+            coordinate_id: coordinateID,
+          })
       }
-
-      const { error } = await supabase
-        .from('fields_x_coordinates')
-        .insert({
-          field_id: fieldID,
-          coordinate_id: coordinateID,
-        })
     }
   }
 
   return (
     <div>
       <Map
-        ref={mapRef}
         initialViewState={{
           latitude: 37.8,
           longitude: -122.4,
@@ -159,8 +237,8 @@ export default function FieldMapUpdate({use = 'display', fieldID}: FieldMapUpdat
           position='top-left'
           displayControlsDefault={false}
           controls={{
-            polygon: use == 'create',
-            trash: use == 'create'
+            polygon: use !== 'display',
+            trash: use !== 'display',
           }}
           defaultMode="draw_polygon"
           onCreate={onUpdate}
@@ -179,7 +257,7 @@ export default function FieldMapUpdate({use = 'display', fieldID}: FieldMapUpdat
         </Source>
       </Map>
       <input value={fieldName} onChange={(e) => setFieldName(e.target.value)} type='text' />
-      <button onClick={() => console.log(features)}>Save</button>
+      <button onClick={onSave}>Save</button>
     </div>
   )
 }

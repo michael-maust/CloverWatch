@@ -4,6 +4,7 @@ import { Dispatch, SetStateAction } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPencil } from '@fortawesome/free-solid-svg-icons'
 import Tasks from './Tasks'
+import WeatherForecast from './WeatherForecast'
 
 type Dashboard = {
   setIsUpdating: Dispatch<SetStateAction<boolean>>
@@ -16,7 +17,7 @@ function Dashboard({ setIsUpdating }: Dashboard) {
 
 
   return (
-    <Layout className='flex-col gap-3 flex-1 grid grid-rows-[fit-content,auto] relative'>
+    <Layout className='flex-col gap-3 flex-1 grid grid-rows-[100px,auto] relative'>
 
       <div className="bg-lightGreen w-full flex-1 sticky top-0 p-6 items-center flex">
         <div className="flex gap-3 justify-between w-full">
@@ -34,8 +35,7 @@ function Dashboard({ setIsUpdating }: Dashboard) {
 
 
       </div>
-
-      <div className="h-[3000px] overflow-y-auto p-3">body</div>
+      <WeatherForecast lat={40.7128} long={-74.006} />
 
       <Tasks />
 

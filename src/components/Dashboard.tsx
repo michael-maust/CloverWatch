@@ -5,6 +5,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPencil } from '@fortawesome/free-solid-svg-icons'
 import Tasks from './Tasks'
 import WeatherForecast from './WeatherForecast'
+import FieldMap from './map/FieldMap'
+import "mapbox-gl/dist/mapbox-gl.css";
 
 type Dashboard = {
   setIsUpdating: Dispatch<SetStateAction<boolean>>
@@ -36,6 +38,12 @@ function Dashboard({ setIsUpdating }: Dashboard) {
 
       </div>
       <WeatherForecast lat={40.7128} long={-74.006} />
+      {/* <FieldMap use='display' fieldID={21} /> */}
+
+      <div className="w-[500px] h-[400px] relative">
+        <FieldMap use='create' />
+      </div>
+
 
       <Tasks />
 

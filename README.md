@@ -1,5 +1,7 @@
 ![ee](https://user-images.githubusercontent.com/65863230/232316461-23764784-bd4e-45d4-bc9e-ef12d32098a3.png)
 
+https://youtu.be/VdwQ51WPmMU
+
 ## Inspiration
 We were actually inspired by the John Deere intro speech by Daniel Grum. One of us is also currently taking an environmental science class and we identified various environmental issues and pains within the farming industry that we thought we could solve. 
 
